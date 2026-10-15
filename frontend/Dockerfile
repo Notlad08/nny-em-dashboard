@@ -1,4 +1,3 @@
-# React frontend
 FROM node:18-alpine
 
 WORKDIR /app
@@ -12,17 +11,14 @@ RUN npm install
 # Copy source code
 COPY . .
 
-# Build application
-RUN npm run build
+# Install nginx
+RUN apk add --no-cache nginx
 
-# Serve with Nginx
-FROM nginx:alpine
+# Copy nginx config (main config file, removes default)
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Copy built files
-COPY --from=0 /app/dist /usr/share/nginx/html
-
-# Copy nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Remove any default conf.d files
+RUN rm -rf /etc/nginx/conf.d/*
 
 EXPOSE 80
 

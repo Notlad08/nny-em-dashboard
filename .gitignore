@@ -33,10 +33,16 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Build
 dist/
 build/
+node_modules/
+frontend/node_modules/
+
+# React build output
+frontend/build/
 
 # Test coverage
 .coverage
@@ -44,7 +50,18 @@ htmlcov/
 
 # IDE specific
 *.pdb
+.project
+.pydevproject
+.settings/
 
 # Temporary files
 *.tmp
 *.temp
+*.bak
+*.swp
+
+# Audio files (optional - comment out if you want to track audio)
+# audio/
+
+# Frontend
+frontend/.env

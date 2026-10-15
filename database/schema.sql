@@ -2,11 +2,11 @@
 
 -- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-CREATE EXTENSION IF NOT EXISTS "postgis";
-CREATE EXTENSION IF NOT EXISTS "timescaledb";
+-- PostGIS not available - using TEXT for location fields
+-- Timescale not needed for standard PostgreSQL
 
--- Timescale hypertable configuration
-SELECT create_hypertable('timescaledb', 'timescaledb_version');
+-- Remove Timescale hypertable configuration
+-- SELECT create_hypertable('timescaledb', 'timescaledb_version');
 
 -- Incidents table (core)
 CREATE TABLE incidents (
@@ -15,15 +15,14 @@ CREATE TABLE incidents (
     units TEXT[],
     address TEXT,
     incident_type TEXT,
-    location GEOMETRY(POINT, 4326),
+    location TEXT,  -- Changed from GEOMETRY to TEXT
     transcription TEXT,
     status TEXT DEFAULT 'active',
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Create index for location-based queries
-CREATE INDEX ON incidents USING gist (location);
+-- Create index for timestamp-based queries
 CREATE INDEX ON incidents (timestamp DESC);
 
 -- Incident timeline
@@ -44,7 +43,7 @@ CREATE TABLE units (
     unit_id TEXT UNIQUE NOT NULL,
     callsign TEXT,
     status TEXT DEFAULT 'available',
-    last_known_location GEOMETRY(POINT, 4326),
+    last_known_location TEXT,  -- Changed from GEOMETRY to TEXT
     last_transmission TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
@@ -58,11 +57,10 @@ CREATE TABLE weather_data (
     timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     source TEXT NOT NULL,
     data JSONB NOT NULL,
-    location GEOMETRY(POINT, 4326)
+    location TEXT  -- Changed from GEOMETRY to TEXT
 );
 
 CREATE INDEX ON weather_data (timestamp DESC);
-CREATE INDEX ON weather_data USING gist (location);
 
 -- External data - Outages
 CREATE TABLE outage_data (
@@ -70,11 +68,10 @@ CREATE TABLE outage_data (
     timestamp TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     source TEXT NOT NULL,
     data JSONB NOT NULL,
-    location GEOMETRY(POINT, 4326)
+    location TEXT  -- Changed from GEOMETRY to TEXT
 );
 
 CREATE INDEX ON outage_data (timestamp DESC);
-CREATE INDEX ON outage_data USING gist (location);
 
 -- Ingestion metadata (for tracking chunks)
 CREATE TABLE ingestion_metadata (
@@ -89,10 +86,6 @@ CREATE TABLE ingestion_metadata (
 
 CREATE INDEX ON ingestion_metadata (stream_id);
 CREATE INDEX ON ingestion_metadata (processed);
-
--- Create hypertable for time-series data
-SELECT create_hypertable('weather_data', 'timestamp');
-SELECT create_hypertable('outage_data', 'timestamp');
 
 -- Function to update timestamps
 CREATE OR REPLACE FUNCTION update_updated_at_column()
