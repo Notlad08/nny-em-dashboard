@@ -1,0 +1,120 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  pg:
+    image: timescale/postgres:16-latest
+    container_name: nny_em_pg
+    environment:
+      - POSTGRES_DB=nny_em_dashboard
+      - POSTGRES_USER=emdash
+      - POSTGRES_PASSWORD=emdash_secure_password_change_me
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U emdash -d nny_em_dashboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Redis (message broker + pub/sub)
+  redis:
+    image: redis:7-alpine
+    container_name: nny_em_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # API Server
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: nny_em_api
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://emdash:emdash_secure_password_change_me@pg:5432/nny_em_dashboard
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-change_this_in_production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-*}
+      - LOG_LEVEL=INFO
+    depends_on:
+      pg:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./api:/app
+      - ./logs:/app/logs
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  # Ingestion Worker
+  ingestion:
+    build:
+      context: ./ingestion
+      dockerfile: Dockerfile
+    container_name: nny_em_ingestion
+    environment:
+      - DATABASE_URL=postgresql://emdash:emdash_secure_password_change_me@pg:5432/nny_em_dashboard
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SDRTRUNK_HOST=sdrrtrunk
+      - SDRTRUNK_PORT=8000
+    depends_on:
+      pg:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./ingestion:/app
+      - ./audio:/audio
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+
+  # Transcription Worker
+  transcription:
+    build:
+      context: ./transcription
+      dockerfile: Dockerfile
+    container_name: nny_em_transcription
+    environment:
+      - DATABASE_URL=postgresql://emdash:emdash_secure_password_change_me@pg:5432/nny_em_dashboard
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - WHISPER_MODEL=base
+      - WHISPER_DEVICE=cpu
+    depends_on:
+      pg:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./transcription:/app
+      - ./audio:/audio
+    command: python -m uvicorn app.main:app --host 0.0.0.0 --port 8002 --reload
+
+  # Frontend (React)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: nny_em_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  pg_data:
+  redis_data:
+  audio:

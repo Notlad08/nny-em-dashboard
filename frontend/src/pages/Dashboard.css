@@ -1,0 +1,175 @@
+# Dashboard
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+# Dashboard nav
+.dashboard-nav {
+  background: #1a1a2e;
+  color: white;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+# Nav title
+.nav-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+# Nav links
+.nav-links {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-links a {
+  color: #9ca3af;
+  text-decoration: none;
+  font-size: 0.875rem;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover {
+  color: white;
+}
+
+.logout-link {
+  color: #ef4444;
+}
+
+.logout-link:hover {
+  color: #dc2626;
+}
+
+# Dashboard content
+.dashboard-content {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+# Dashboard header
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.dashboard-header h1 {
+  color: #1a1a2e;
+  font-size: 1.75rem;
+  margin: 0;
+}
+
+# Incident count
+.incident-count {
+  background: #3b82f6;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+# Incidents grid
+.incidents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+# Incident card
+.incident-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.incident-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+# Incident header
+.incident-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+# Incident title
+.incident-header h3 {
+  margin: 0;
+  color: #1a1a2e;
+  font-size: 1.25rem;
+}
+
+# Status badge
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-badge.active {
+  background: #dcfce7;
+  color: #166534;
+}
+
+# Incident info
+.incident-info {
+  color: #666;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+
+.incident-info p {
+  margin: 0.5rem 0;
+}
+
+# Incident actions
+.incident-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #eee;
+}
+
+.incident-actions a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+# Loading
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #666;
+  font-size: 1.25rem;
+}
+
+# No incidents
+.no-incidents {
+  text-align: center;
+  padding: 4rem;
+  color: #666;
+}
+
+.no-incidents h2 {
+  color: #333;
+  margin-bottom: 1rem;
+}
